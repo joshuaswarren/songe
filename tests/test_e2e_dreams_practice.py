@@ -5,10 +5,10 @@ which comes from the practice table. The harness seeded only recorded
 exchanges, so train was 0 and the log stage always failed for vLLM with
 "Synthetic conversations did not yield enough independent hindsight".
 """
+from scripts.e2e import seed, seed_practice
 from songe.config import Config
 from songe.log import Store
 from songe.sleep.worker import preview
-from scripts.e2e import seed, seed_practice
 
 
 def test_log_stage_has_trainable_pool_under_dreams(tmp_path):
