@@ -8,10 +8,7 @@ binding) is verified two lines below.
 """
 import asyncio
 import contextlib
-import json
 from types import SimpleNamespace
-
-import pytest
 
 import scripts.e2e_linux as e2e
 
