@@ -297,3 +297,35 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def seed_practice(store, count=24):
+    """Practice scenes a Dreams night trains on, the shape reading leaves.
+
+    Under learning="dreams" real conversations never enter training: the
+    pool is kept practice scenes, so a store that only has recorded
+    exchanges has nothing to train. Same table release_dream.py writes.
+    """
+    for n in range(count):
+        scene = {
+            "id": f"sig{n}#v1",
+            "signal_id": f"sig{n}",
+            "tools": [],
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a coding agent in this repository.",
+                },
+                {
+                    "role": "user",
+                    "content": f"For synthetic case {n}, what is the observed pass phrase? Reply with the phrase only.",
+                },
+            ],
+            "teacher_note": "The observed pass phrase is SILVER MAPLE.",
+        }
+        with store.connect() as db:
+            db.execute(
+                'INSERT INTO practice(id,model_id,signal_id,payload,kept,"drop",created)'
+                " VALUES (?,?,?,?,1,NULL,0)",
+                (scene["id"], store.model_id, scene["signal_id"], json.dumps(scene)),
+            )

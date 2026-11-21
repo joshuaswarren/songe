@@ -633,7 +633,7 @@ async def cleanup_ollama(upstream, config, store):
 async def exercise(args, scratch, reporter, ollama_folder):
     import httpx
 
-    from scripts.e2e import seed
+    from scripts.e2e import seed, seed_practice
     from songe.config import Config
     from songe.log import Store
     from songe.models import trainable_base
@@ -794,6 +794,9 @@ async def exercise(args, scratch, reporter, ollama_folder):
         with reporter.stage("log") as row:
             if not args.live_experience:
                 seed(store, config.public_model)
+            # Under learning="dreams" the train pool is kept practice
+            # scenes, which recorded exchanges never produce.
+            seed_practice(store)
             info, _, _ = preview(config, store)
             require(
                 info["train"] >= config.min_train
