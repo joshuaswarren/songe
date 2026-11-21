@@ -501,12 +501,12 @@ async def record_experience(config, store, upstream, reporter, *, conversations=
                 )
                 response.raise_for_status()
                 body = response.json()
-                expected = (
-                    upstream.request_model(base)
-                    if hasattr(upstream, "request_model")
-                    else base["identifier"]
+                # The proxy returns the requested name (ModelRename contract);
+                # the base binding is verified on the stored rows below.
+                require(
+                    body.get("model") == config.public_model,
+                    "Recording used the wrong base",
                 )
-                require(body.get("model") == expected, "Recording used the wrong base")
                 context.append(body["choices"][0]["message"])
                 if not followup:
                     context.append(
