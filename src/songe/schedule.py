@@ -3142,7 +3142,17 @@ class ModelScheduler(Scheduler):
             )
             self.active_model = None
             return
-        kinds = {a.kind for a in self.platform.accelerators()}
+        platform = self.platform
+        if self.config.backend == "mlx" and platform.name == "linux":
+            from .memory import TrainingPlatform
+
+            platform = TrainingPlatform(platform, self.config)
+        try:
+            kinds = {a.kind for a in await asyncio.to_thread(platform.accelerators)}
+        except OSError as exc:
+            self.reason = str(exc)
+            self.active_model = None
+            return
         if kinds <= {"cpu"} and not (
             self.config.force_cpu_training
             or self.config.torch_options.get("force_cpu", False)

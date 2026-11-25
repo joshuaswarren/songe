@@ -718,20 +718,34 @@ def test_calibration_persists_observed_unsupported_reason(learners, monkeypatch)
     assert registry.find(store, "first")["support"] == "trainable"
 
 
+@pytest.mark.parametrize("linux_mlx", [False, True])
 async def test_scheduler_runs_one_guarded_model_worker_and_yields_when_off(
-    learners, monkeypatch
+    learners, monkeypatch, linux_mlx
 ):
     from songe import schedule
     from songe.platform import Accel, Memory
     from tests.test_schedule import good
 
     config, store = learners
+    if linux_mlx:
+        from songe import memory
+
+        learner = registry.model_config(config, store, "second")
+        learner.backend = "mlx"
+        registry.save_config(learner, store)
+        monkeypatch.setattr(
+            memory, "linux_mlx_accelerator", lambda: Accel("mlx", "Apple GPU")
+        )
     registry.enable(store, "first", False)
     registry.support(store, "second", "pending", "Waiting for measured trainability")
     platform = SimpleNamespace(
-        name="test",
+        name="linux" if linux_mlx else "test",
         memory=lambda: Memory(24 * 10**9, 20 * 10**9),
-        accelerators=lambda: [Accel("cuda", "fixture", 8 * 10**9, 8 * 10**9)],
+        accelerators=lambda: (
+            [Accel("cpu", "CPU")]
+            if linux_mlx
+            else [Accel("cuda", "fixture", 8 * 10**9, 8 * 10**9)]
+        ),
         keep_awake=lambda pid: None,
     )
 
